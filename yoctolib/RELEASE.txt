@@ -1,0 +1,3 @@
+Objective-C v1.10.31897
+
+- Add method set_hslColorAtPowerOn in YColorLedCluster class
