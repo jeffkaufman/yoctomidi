@@ -1,12 +1,8 @@
-gcmidi: yoctocmidi.m
-	gcc \
-    -F/System/Library/PrivateFrameworks \
-	  -framework CoreMIDI \
-    -framework CoreFoundation \
-    -framework CoreAudio \
-    -framework Foundation \
-    -framework IOKit \
-	  yoctomidi.m -o yoctomidi -std=c99 -Wall
+yoctomidi: yoctomidi.m
+	cd yoctolib/Examples/Doc-GettingStarted-Yocto-3D/ && make
+
+clean:
+	cd yoctolib/Examples/Doc-GettingStarted-Yocto-3D/ && make clean
 
 run: yoctomidi
 	./yoctomidi

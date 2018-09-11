@@ -8,9 +8,16 @@ only.
 No dependencies beyond the compiler; just run:
 
 ```
-$ make run
+$ (cd yoctolib/Examples/Doc-GettingStarted-Yocto-3D/ && make)
+$ make
 ```
 
-This will build it and start it running.  It will present as a midi device
-labeled "yocto 3d v2 controller" which sends CC values.
+Then when you're ready to run it, run:
+
+```
+make run
+```
+
+It will present as a midi device labeled "yocto 3d v2 controller" which sends
+CC values.
 
