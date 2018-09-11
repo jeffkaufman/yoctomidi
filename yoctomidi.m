@@ -39,7 +39,7 @@ int last_tilt1 = 63;
 int last_tilt2 = 63;
 
 #define CC_TILT1 30
-#define CC_TILT2 30
+#define CC_TILT2 31
 
 void die(char *errmsg) {
   printf("%s\n",errmsg);
