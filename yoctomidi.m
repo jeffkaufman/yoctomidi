@@ -88,6 +88,11 @@ void setup_midi() {
    "creating OS-X virtual MIDI source." );
 }
 
+void yocto_callback(YTilt* tilt, NSString* functionValue) {
+  NSLog(@"Tilt %d: %@", tilt == tilt1 ? 1 : 2, functionValue);
+  // todo call send_midi
+}
+
 void setup_yocto() {
   NSError *error;
   if([YAPI RegisterHub:@"usb": &error] != YAPI_SUCCESS) {
@@ -105,34 +110,14 @@ void setup_yocto() {
   // retrieve all sensors on the device matching the serial
   tilt1 = [YTilt FindTilt:[serial stringByAppendingString:@".tilt1"]];
   tilt2 = [YTilt FindTilt:[serial stringByAppendingString:@".tilt2"]];
+
+  [tilt1 registerValueCallback:yocto_callback];
+  [tilt2 registerValueCallback:yocto_callback];
 }
 
 int map_to_midi(double tilt) {
   // Tilt is in degress, so from -180 to +180.  Map to 0 ... 127
   return (tilt + 180) * 128 / 360;
-}
-
-void poll_yocto() {
-  double d_tilt1 = [tilt1 get_currentValue];
-  double d_tilt2 = [tilt2 get_currentValue];
-
-  if (d_tilt1 == Y_CURRENTVALUE_INVALID ||
-      d_tilt2 == Y_CURRENTVALUE_INVALID) {
-    return;
-  }
-
-  int i_tilt1 = map_to_midi(d_tilt1);
-  int i_tilt2 = map_to_midi(d_tilt2);
-
-  if (i_tilt1 != last_tilt1) {
-    last_tilt1 = i_tilt1;
-    send_midi(CC_TILT1, i_tilt1);
-  }
-
-  if (i_tilt2 != last_tilt2) {
-    last_tilt2 = i_tilt2;
-    send_midi(CC_TILT2, i_tilt2);
-  }    
 }
 
 void setup() {
@@ -144,8 +129,7 @@ int main(int argc, char** argv) {
   @autoreleasepool {
     setup();
     while (true) {
-      poll_yocto();
-      [YAPI Sleep:1:NULL];
+      [YAPI Sleep:250:NULL];
     }
   }
   return 0;
