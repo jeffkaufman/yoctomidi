@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
     setup();
     while (true) {
       poll_yocto();
-      [YAPI Sleep:10:NULL];
+      [YAPI Sleep:1:NULL];
     }
   }
   return 0;
