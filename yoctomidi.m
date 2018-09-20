@@ -25,21 +25,18 @@
 #import <Foundation/Foundation.h>
 
 #import "yocto_api.h"
-#import "yocto_tilt.h"
+#import "yocto_gyro.h"
 
 #define MAX_AXES 256
 
 MIDIClientRef midiclient;
 MIDIEndpointRef midiendpoint;
 
-YTilt* tilt1;
-YTilt* tilt2;
+int last_roll = 63;
+int last_pitch = 63;
 
-int last_tilt1 = 63;
-int last_tilt2 = 63;
-
-#define CC_TILT1 30
-#define CC_TILT2 31
+#define CC_ROLL 30
+#define CC_PITCH 31
 
 void die(char *errmsg) {
   printf("%s\n",errmsg);
@@ -88,9 +85,18 @@ void setup_midi() {
    "creating OS-X virtual MIDI source." );
 }
 
-void yocto_callback(YTilt* tilt, NSString* functionValue) {
-  NSLog(@"Tilt %d: %@", tilt == tilt1 ? 1 : 2, functionValue);
-  // todo call send_midi
+void yocto_callback(YGyro* gyro, double roll, double pitch, double heading) {
+  int i_roll = map_to_midi(roll);
+  int i_pitch = map_to_midi(pitch);
+
+  if (i_roll != last_roll) {
+    last_roll = i_roll;
+    send_midi(CC_ROLL, i_roll);
+  }
+  if (i_pitch != last_pitch) {
+    last_pitch = i_pitch;
+    send_midi(CC_PITCH, i_pitch);
+  }
 }
 
 void setup_yocto() {
@@ -100,24 +106,18 @@ void setup_yocto() {
     exit(1);
   }
 
-  YTilt *anytilt = [YTilt FirstTilt];
-  if (anytilt == NULL) {
+  YGyro* gyro = [YGyro FirstGyro];
+  if (gyro == NULL) {
     NSLog(@"No yocto module connected (check USB cable)");
     exit(1);
   }
 
-  NSString *serial = [[anytilt get_module] get_serialNumber];
-  // retrieve all sensors on the device matching the serial
-  tilt1 = [YTilt FindTilt:[serial stringByAppendingString:@".tilt1"]];
-  tilt2 = [YTilt FindTilt:[serial stringByAppendingString:@".tilt2"]];
-
-  [tilt1 registerValueCallback:yocto_callback];
-  [tilt2 registerValueCallback:yocto_callback];
+  [gyro registerAnglesCallback:yocto_callback];
 }
 
-int map_to_midi(double tilt) {
+int map_to_midi(double degrees) {
   // Tilt is in degress, so from -180 to +180.  Map to 0 ... 127
-  return (tilt + 180) * 128 / 360;
+  return (degrees + 180) * 128 / 360;
 }
 
 void setup() {
