@@ -49,8 +49,6 @@ void attempt(OSStatus result, char* errmsg) {
 
 #define PACKET_BUF_SIZE (3+64) /* 3 for message, 32 for structure vars */
 void send_midi(int cc, int v) {
-  printf("Sending CC-%d: %d\n", cc, v);
-
   Byte buffer[PACKET_BUF_SIZE];
   Byte msg[3];
   msg[0] = 0xb0;  // control change
@@ -88,6 +86,10 @@ void setup_midi() {
 void yocto_callback(YGyro* gyro, double roll, double pitch, double heading) {
   int i_roll = map_to_midi(roll);
   int i_pitch = map_to_midi(pitch);
+
+  if (i_roll != last_roll || i_pitch != last_pitch) {
+    printf("%10d %10d\n", i_roll, i_pitch);
+  }
 
   if (i_roll != last_roll) {
     last_roll = i_roll;
